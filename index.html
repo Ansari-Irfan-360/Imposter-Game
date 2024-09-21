@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Imposter Game</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            text-align: center;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #4a90e2;
+            margin-bottom: 20px;
+        }
+
+        #game {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            border-radius: 10px;
+            background: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        input, button {
+            padding: 10px;
+            margin: 10px 0;
+            width: 80%;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            border-color: #4a90e2;
+            outline: none;
+        }
+
+        button {
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #357ab8;
+        }
+
+        #game-screen p {
+            font-size: 28px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        #player-count {
+            font-size: 18px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between; 
+            margin: 10px auto;
+            width: 40%;
+        }
+
+
+        .checkbox-label span {
+            margin: auto;
+        }
+
+        .toggle {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #4a90e2;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .error-message {
+            color: red;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Imposter Game</h1>
+    <div id="game">
+        <!-- Room ID Section -->
+        <div id="room-section">
+            <label for="room-id">Room ID:</label>
+            <input type="text" id="room-id" placeholder="Enter Room ID" required>
+            <button id="join-btn">Join Game</button>
+        </div>
+
+        <!-- Display the current room ID -->
+        <p id="current-room-id" class="hidden">Current Room: <span id="room-id-display"></span></p>
+
+        <!-- Admin screen to start the game -->
+        <div id="admin-screen" style="display: none;">
+            <label for="imposter-count">Number of imposters:</label>
+            <input type="number" id="imposter-count" min="1" max="10" value="1">
+            <label class="checkbox-label">
+                <span>Randomize Count</span>
+                <div class="toggle">
+                    <input type="checkbox" id="random-imposter">
+                    <span class="slider"></span>
+                </div>
+            </label>
+            <button id="start-btn">Start Game</button>
+            <div class="error-message" id="error-message" style="display: none;"></div>
+        </div>
+
+        <!-- Waiting screen for non-admin players -->
+        <div id="waiting-screen" style="display: none;">
+            <p>Waiting for the game to start...</p>
+        </div>
+
+        <!-- Game screen for all players -->
+        <div id="game-screen" style="display: none;">
+            <p id="word"></p>
+        </div>
+
+        <!-- Next Game button for admin -->
+        <div id="next-game-section" class="hidden">
+            <button id="next-game-btn">Next Game</button>
+        </div>
+
+        <div id="player-count">Players connected: <span id="player-count-num">0</span></div>
+    </div>
+
+    <script>
+        const socket = new WebSocket('ws://localhost:8080');
+        let isAdmin = false;
+        let roomId = '';
+        let imposterCount = 1; // Store imposter count preference
+        let randomImposter = false; // Store random imposter preference
+
+        // Join button to send room ID and join the game
+        document.getElementById('join-btn').addEventListener('click', () => {
+            roomId = document.getElementById('room-id').value;
+            if (!roomId) {
+                alert('Please enter a Room ID');
+                return;
+            }
+            socket.send(JSON.stringify({ type: 'join', roomId }));
+
+            // Hide the room input section and show the current room ID
+            document.getElementById('room-section').style.display = 'none';
+            document.getElementById('current-room-id').classList.remove('hidden');
+            document.getElementById('room-id-display').textContent = roomId;
+        });
+
+        // Listen for messages from the server
+        socket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+
+            if (data.type === 'joined') {
+                if (data.isAdmin) {
+                    isAdmin = true;
+                    document.getElementById('admin-screen').style.display = 'block';
+                } else {
+                    document.getElementById('waiting-screen').style.display = 'block';
+                }
+            }
+
+            if (data.type === 'playerCount') {
+                document.getElementById('player-count-num').textContent = data.count;
+            }
+
+            if (data.type === 'gameStart') {
+                document.getElementById('waiting-screen').style.display = 'none';
+                document.getElementById('admin-screen').style.display = 'none';
+                document.getElementById('game-screen').style.display = 'block';
+                document.getElementById('word').innerText = data.word || "You are the imposter!";
+
+                // If admin, show the "Next Game" button
+                if (isAdmin) {
+                    document.getElementById('next-game-section').classList.remove('hidden');
+                }
+            }
+
+            if (data.type === 'resetGame') {
+                document.getElementById('game-screen').style.display = 'none';
+                document.getElementById('waiting-screen').style.display = 'block';
+                document.getElementById('next-game-section').classList.add('hidden');  // Hide next game button
+            }
+        };
+
+        // Admin starts the game
+        document.getElementById('start-btn').addEventListener('click', () => {
+            imposterCount = document.getElementById('imposter-count').value;
+            randomImposter = document.getElementById('random-imposter').checked;
+
+            socket.send(JSON.stringify({ type: 'start', roomId, imposterCount, randomImposter }));
+        });
+
+        // Admin starts the next game
+        document.getElementById('next-game-btn').addEventListener('click', () => {
+            socket.send(JSON.stringify({ type: 'nextGame', roomId, imposterCount, randomImposter }));
+        });
+    </script>
+</body>
+</html>
