@@ -147,7 +147,7 @@
         </div>
 
         <!-- Display the current room ID -->
-        <p id="current-room-id" class="hidden">Current Room: <span id="room-id-display"></span></p>
+        <p id="current-room-id" class="hidden">Current Room ID: <span id="room-id-display"></span></p>
 
         <!-- Admin screen to start the game -->
         <div id="admin-screen" style="display: none;">
@@ -183,7 +183,7 @@
     </div>
 
     <script>
-        const socket = new WebSocket('ws://localhost:8080');
+        const socket = new WebSocket('https://imposter-server.netlify.app/');
         let isAdmin = false;
         let roomId = '';
         let imposterCount = 1; // Store imposter count preference
