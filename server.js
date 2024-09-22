@@ -670,6 +670,7 @@ wss.on("connection", (ws) => {
       // Check if the room already exists or create a new one
       if (!rooms[roomId]) {
         rooms[roomId] = { players: [], admin: null };
+        console.log(`New room created: ${roomId}`);
       }
       const room = rooms[roomId];
       const player = { ws, isAdmin: false };
@@ -768,4 +769,4 @@ wss.on("connection", (ws) => {
   });
 });
 
-console.log("Server Started on ws://localhost:8080");
+console.log("Server Started");
