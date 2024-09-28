@@ -722,14 +722,27 @@ wss.on("connection", (ws) => {
         imposters.add(room.players[imposterIndex]);
       }
 
-      // Send word to players
+      // Get names of imposters
+      const imposterNames = Array.from(imposters).map((player) => player.name);
+
+      // Send word to all players and reveal other imposters to the imposters
       room.players.forEach((player) => {
-        player.ws.send(
-          JSON.stringify({
-            type: "gameStart",
-            word: imposters.has(player) ? null : chosenWord,
-          })
-        );
+        if (imposters.has(player)) {
+          player.ws.send(
+            JSON.stringify({
+              type: "gameStart",
+              word: null, // Imposters don't get the word
+              imposters: imposterNames, // Reveal other imposters
+            })
+          );
+        } else {
+          player.ws.send(
+            JSON.stringify({
+              type: "gameStart",
+              word: chosenWord, // Non-imposters get the word
+            })
+          );
+        }
       });
     }
 
@@ -749,14 +762,26 @@ wss.on("connection", (ws) => {
         imposters.add(room.players[imposterIndex]);
       }
 
+      const imposterNames = Array.from(imposters).map((player) => player.name);
+
       // Send the new word and imposter information to all players
       room.players.forEach((player) => {
-        player.ws.send(
-          JSON.stringify({
-            type: "gameStart",
-            word: imposters.has(player) ? null : chosenWord,
-          })
-        );
+        if (imposters.has(player)) {
+          player.ws.send(
+            JSON.stringify({
+              type: "gameStart",
+              word: null,
+              imposters: imposterNames,
+            })
+          );
+        } else {
+          player.ws.send(
+            JSON.stringify({
+              type: "gameStart",
+              word: chosenWord,
+            })
+          );
+        }
       });
     }
   });
