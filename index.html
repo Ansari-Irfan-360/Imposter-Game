@@ -248,7 +248,7 @@
     </div>
 
     <script>
-      const socket = new WebSocket("ws:localhost:8080");
+      const socket = new WebSocket("https://imposter-game-dkho.onrender.com");
 
       let connectionTimeout = setTimeout(() => {
         if (socket.readyState !== WebSocket.OPEN) {
