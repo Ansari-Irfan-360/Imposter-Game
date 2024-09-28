@@ -1,8 +1,3 @@
-const WebSocket = require("ws");
-
-const wss = new WebSocket.Server({ port: 8080 });
-let rooms = {}; // Object to hold all game rooms and their players
-
 const words = [
   "air",
   "alarm",
@@ -653,11 +648,21 @@ const words = [
   "yarn",
 ];
 
+const WebSocket = require("ws");
+
+const wss = new WebSocket.Server({ port: 8080 });
+let rooms = {}; // Object to hold all game rooms and their players
+
 // Function to update player count in a room
 const updatePlayerCount = (roomId) => {
   const room = rooms[roomId];
-  const message = JSON.stringify({ type: 'playerCount', count: room.players.length });
-  room.players.forEach(player => player.ws.send(message));
+  const playerNames = room.players.map((player) => player.name);
+  const message = JSON.stringify({
+    type: "playerCount",
+    count: room.players.length,
+    players: playerNames,
+  });
+  room.players.forEach((player) => player.ws.send(message));
 };
 
 wss.on("connection", (ws) => {
@@ -665,15 +670,15 @@ wss.on("connection", (ws) => {
     const data = JSON.parse(message);
 
     if (data.type === "join") {
-      const roomId = data.roomId;
+      const { roomId, playerName } = data;
 
       // Check if the room already exists or create a new one
       if (!rooms[roomId]) {
         rooms[roomId] = { players: [], admin: null };
-        console.log(`New room created: ${roomId}`);
+        console.log("New room created: ${roomId}");
       }
       const room = rooms[roomId];
-      const player = { ws, isAdmin: false };
+      const player = { ws, name: playerName, isAdmin: false };
       room.players.push(player);
 
       // Assign admin status to the first player in the room
@@ -701,7 +706,12 @@ wss.on("connection", (ws) => {
 
       // Validate imposter count
       if (imposterCount >= playersCount) {
-        ws.send(JSON.stringify({ type: "error", message: "Imposter count is too high." }));
+        ws.send(
+          JSON.stringify({
+            type: "error",
+            message: "Imposter count is too high.",
+          })
+        );
         return;
       }
 
@@ -713,7 +723,7 @@ wss.on("connection", (ws) => {
       }
 
       // Send word to players
-      room.players.forEach(player => {
+      room.players.forEach((player) => {
         player.ws.send(
           JSON.stringify({
             type: "gameStart",
@@ -740,7 +750,7 @@ wss.on("connection", (ws) => {
       }
 
       // Send the new word and imposter information to all players
-      room.players.forEach(player => {
+      room.players.forEach((player) => {
         player.ws.send(
           JSON.stringify({
             type: "gameStart",
@@ -753,17 +763,21 @@ wss.on("connection", (ws) => {
 
   ws.on("close", () => {
     // Remove the player from all rooms
-    Object.keys(rooms).forEach(roomId => {
-      rooms[roomId].players = rooms[roomId].players.filter((player) => player.ws !== ws);
+    Object.keys(rooms).forEach((roomId) => {
+      rooms[roomId].players = rooms[roomId].players.filter(
+        (player) => player.ws !== ws
+      );
 
-      // If the admin leaves, assign a new admin if players are still present
+      // If the admin leaves, assign a new admin
       if (ws === rooms[roomId].admin?.ws && rooms[roomId].players.length > 0) {
-        rooms[roomId].admin = rooms[roomId].players[0];  // The next player becomes the admin
+        rooms[roomId].admin = rooms[roomId].players[0]; // The next player becomes the admin
         rooms[roomId].admin.isAdmin = true;
-        rooms[roomId].admin.ws.send(JSON.stringify({ type: "joined", isAdmin: true }));
+        rooms[roomId].admin.ws.send(
+          JSON.stringify({ type: "joined", isAdmin: true })
+        );
       }
 
-      // Update player count for all players in the room
+      // Update player count and player list for all players in the room
       updatePlayerCount(roomId);
     });
   });
