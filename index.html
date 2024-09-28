@@ -248,9 +248,18 @@
 
     <script>
       const socket = new WebSocket("https://imposter-game-dkho.onrender.com");
-      socket.addEventListener("error", (event) => {
-        alert("Server is down!. Try again in 30s");
+
+      let connectionTimeout = setTimeout(() => {
+        if (socket.readyState !== WebSocket.OPEN) {
+          alert("Server is Down. Try again in 20s");
+          socket.close(); // Close the socket if the connection is not established
+        }
+      }, 5000); // 10 seconds timeout
+
+      socket.addEventListener("open", () => {
+        clearTimeout(connectionTimeout); // Clear the timeout if the connection is successful
       });
+
       let isAdmin = false;
       let roomId = "";
       let imposterCount = 1; // Store imposter count preference
@@ -309,7 +318,7 @@
           document.getElementById("admin-screen").style.display = "none";
           document.getElementById("game-screen").style.display = "block";
           document.getElementById("word").innerText =
-            data.word || "Imposter";
+            data.word || "You are the imposter!";
 
           // If admin, show the "Next Game" button
           if (isAdmin) {
