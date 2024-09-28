@@ -233,6 +233,7 @@
       <!-- Game screen for all players -->
       <div id="game-screen" style="display: none">
         <p id="word"></p>
+        <p id="other-imposters" class="hidden"></p>
       </div>
 
       <!-- Next Game button for admin -->
@@ -247,14 +248,14 @@
     </div>
 
     <script>
-      const socket = new WebSocket("https://imposter-game-dkho.onrender.com");
+      const socket = new WebSocket("ws:localhost:8080");
 
       let connectionTimeout = setTimeout(() => {
         if (socket.readyState !== WebSocket.OPEN) {
           alert("Server is Down. Try again in 20s");
           socket.close(); // Close the socket if the connection is not established
         }
-      }, 5000); // 10 seconds timeout
+      }, 5000); // 5 seconds timeout
 
       socket.addEventListener("open", () => {
         clearTimeout(connectionTimeout); // Clear the timeout if the connection is successful
@@ -264,11 +265,12 @@
       let roomId = "";
       let imposterCount = 1; // Store imposter count preference
       let randomImposter = false; // Store random imposter preference
+      let playerName = "";
 
       // Join button to send room ID and join the game
       document.getElementById("join-btn").addEventListener("click", () => {
         roomId = document.getElementById("room-id").value;
-        const playerName = document.getElementById("player-name").value;
+        playerName = document.getElementById("player-name").value;
 
         if (!roomId || !playerName) {
           alert("Please enter both your name and a Room ID");
@@ -317,8 +319,24 @@
           document.getElementById("waiting-screen").style.display = "none";
           document.getElementById("admin-screen").style.display = "none";
           document.getElementById("game-screen").style.display = "block";
-          document.getElementById("word").innerText =
-            data.word || "You are the imposter!";
+          document.getElementById("word").innerText = data.word || "Imposter";
+
+          // Check if the player is an imposter and display other imposters
+          if (data.imposters) {
+            
+            const otherImposters = data.imposters.filter(
+              (name) => name !== playerName
+            );
+            
+            if (otherImposters.length > 0) {
+              document.getElementById(
+                "other-imposters"
+              ).innerText = `Other Imposters: ${otherImposters.join(", ")}`;
+              document
+                .getElementById("other-imposters")
+                .classList.remove("hidden");
+            }
+          }
 
           // If admin, show the "Next Game" button
           if (isAdmin) {
