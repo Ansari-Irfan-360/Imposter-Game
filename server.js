@@ -675,7 +675,7 @@ wss.on("connection", (ws) => {
       // Check if the room already exists or create a new one
       if (!rooms[roomId]) {
         rooms[roomId] = { players: [], admin: null };
-        console.log("New room created: ${roomId}");
+        console.log(`New room created: ${roomId}`);
       }
       const room = rooms[roomId];
       const player = { ws, name: playerName, isAdmin: false };
