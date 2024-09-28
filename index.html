@@ -1,257 +1,357 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Imposter Game</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
     <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #f4f4f9;
-            color: #333;
-            text-align: center;
-            padding: 20px;
-        }
+      body {
+        font-family: "Roboto", sans-serif;
+        background-color: #f4f4f9;
+        color: #333;
+        text-align: center;
+        padding: 20px;
+      }
 
-        h1 {
-            color: #4a90e2;
-            margin-bottom: 20px;
-        }
+      h1 {
+        color: #4a90e2;
+        margin-bottom: 20px;
+      }
 
-        #game {
-            max-width: 500px;
-            margin: 0 auto;
-            padding: 20px;
-            border-radius: 10px;
-            background: white;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
+      #game {
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 20px;
+        border-radius: 10px;
+        background: white;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
 
-        input, button {
-            padding: 10px;
-            margin: 10px 0;
-            width: 80%;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-        }
+      input,
+      button {
+        padding: 10px;
+        margin: 10px 0;
+        width: 80%;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 16px;
+        transition: border-color 0.3s;
+      }
 
-        input:focus {
-            border-color: #4a90e2;
-            outline: none;
-        }
+      input:focus {
+        border-color: #4a90e2;
+        outline: none;
+      }
 
-        button {
-            background-color: #4a90e2;
-            color: white;
-            border: none;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
+      button {
+        background-color: #4a90e2;
+        color: white;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
 
-        button:hover {
-            background-color: #357ab8;
-        }
+      button:hover {
+        background-color: #357ab8;
+      }
 
-        #game-screen p {
-            font-size: 28px;
-            font-weight: bold;
-            margin: 20px 0;
-        }
+      #game-screen p {
+        font-size: 28px;
+        font-weight: bold;
+        margin: 20px 0;
+      }
 
-        #player-count {
-            font-size: 18px;
-            margin: 10px 0;
-            font-weight: bold;
-        }
+      #player-count {
+        font-size: 18px;
+        margin: 10px 0;
+        font-weight: bold;
+      }
 
-        .hidden {
-            display: none;
-        }
+      .hidden {
+        display: none;
+      }
 
-        .checkbox-label {
-            display: flex;
-            align-items: center;
-            justify-content: space-between; 
-            margin: 10px auto;
-            width: 13em;
-        }
+      .checkbox-label {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: 10px auto;
+        width: 13em;
+      }
 
+      .checkbox-label span {
+        margin: auto;
+      }
 
-        .checkbox-label span {
-            margin: auto;
-        }
+      .toggle {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+      }
 
-        .toggle {
-            position: relative;
-            display: inline-block;
-            width: 60px;
-            height: 34px;
-        }
+      .toggle input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
 
-        .toggle input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: 0.4s;
+        border-radius: 34px;
+      }
 
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 34px;
-        }
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: 0.4s;
+        border-radius: 50%;
+      }
 
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 26px;
-            width: 26px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
+      input:checked + .slider {
+        background-color: #4a90e2;
+      }
 
-        input:checked + .slider {
-            background-color: #4a90e2;
-        }
+      input:checked + .slider:before {
+        transform: translateX(26px);
+      }
 
-        input:checked + .slider:before {
-            transform: translateX(26px);
-        }
+      .error-message {
+        color: red;
+        font-weight: bold;
+        margin-top: 10px;
+      }
 
-        .error-message {
-            color: red;
-            font-weight: bold;
-            margin-top: 10px;
-        }
+      #player-count {
+        font-size: 18px;
+        margin: 10px 0;
+        font-weight: bold;
+        color: #4a90e2;
+      }
+
+      #player-names {
+        list-style: none;
+        padding: 0;
+        margin: 10px 0;
+      }
+
+      #player-names li {
+        padding: 10px;
+        background-color: #e8f4fc;
+        border-radius: 5px;
+        margin: 5px 0;
+        font-weight: bold;
+        display: flex;
+        justify-content: center;
+        align-items: center; /* Vertically centers the content */
+        position: relative;
+      }
+
+      #player-names li.admin {
+        background-color: #cceeff;
+        color: #333;
+      }
+
+      .player-name {
+        flex-grow: 1;
+        text-align: center;
+      }
+
+      .player-admin {
+        font-size: 12px;
+        font-weight: bold;
+        background-color: #4a90e2;
+        color: white;
+        padding: 3px 8px;
+        border-radius: 4px;
+        position: absolute;
+        right: 10px;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <h1>Imposter Game</h1>
     <div id="game">
-        <!-- Room ID Section -->
-        <div id="room-section">
-            <label for="room-id">Room ID:</label>
-            <input type="text" id="room-id" placeholder="Enter Room ID" required>
-            <button id="join-btn">Join Game</button>
-        </div>
+      <!-- Room ID Section -->
+      <div id="room-section">
+        <input
+          type="text"
+          id="player-name"
+          placeholder="Enter Your Name"
+          required
+        />
+        <input type="text" id="room-id" placeholder="Enter Room ID" required />
 
-        <!-- Display the current room ID -->
-        <p id="current-room-id" class="hidden">Current Room ID: <span id="room-id-display"></span></p>
+        <button id="join-btn">Join Game</button>
+      </div>
 
-        <!-- Admin screen to start the game -->
-        <div id="admin-screen" style="display: none;">
-            <label for="imposter-count">Number of imposters:</label>
-            <input type="number" id="imposter-count" min="1" max="10" value="1">
-            <label class="checkbox-label">
-                <span>Randomize Count</span>
-                <div class="toggle">
-                    <input type="checkbox" id="random-imposter">
-                    <span class="slider"></span>
-                </div>
-            </label>
-            <button id="start-btn">Start Game</button>
-            <div class="error-message" id="error-message" style="display: none;"></div>
-        </div>
+      <!-- Display the current room ID -->
+      <p id="current-room-id" class="hidden">
+        Current Room ID: <span id="room-id-display"></span>
+      </p>
 
-        <!-- Waiting screen for non-admin players -->
-        <div id="waiting-screen" style="display: none;">
-            <p>Waiting for the game to start...</p>
-        </div>
+      <!-- Admin screen to start the game -->
+      <div id="admin-screen" style="display: none">
+        <label for="imposter-count">Number of imposters:</label>
+        <input type="number" id="imposter-count" min="1" max="10" value="1" />
+        <label class="checkbox-label">
+          <span>Randomize Count</span>
+          <div class="toggle">
+            <input type="checkbox" id="random-imposter" />
+            <span class="slider"></span>
+          </div>
+        </label>
+        <button id="start-btn">Start Game</button>
+        <div
+          class="error-message"
+          id="error-message"
+          style="display: none"
+        ></div>
+      </div>
 
-        <!-- Game screen for all players -->
-        <div id="game-screen" style="display: none;">
-            <p id="word"></p>
-        </div>
+      <!-- Waiting screen for non-admin players -->
+      <div id="waiting-screen" style="display: none">
+        <p>Waiting for the game to start...</p>
+      </div>
 
-        <!-- Next Game button for admin -->
-        <div id="next-game-section" class="hidden">
-            <button id="next-game-btn">Next Game</button>
-        </div>
+      <!-- Game screen for all players -->
+      <div id="game-screen" style="display: none">
+        <p id="word"></p>
+      </div>
 
-        <div id="player-count">Players connected: <span id="player-count-num">0</span></div>
+      <!-- Next Game button for admin -->
+      <div id="next-game-section" class="hidden">
+        <button id="next-game-btn">Next Game</button>
+      </div>
+
+      <div id="player-count">
+        Players connected: <span id="player-count-num">0</span>
+      </div>
+      <ul id="player-names"></ul>
     </div>
 
     <script>
-        const socket = new WebSocket('https://imposter-game-dkho.onrender.com');
-        let isAdmin = false;
-        let roomId = '';
-        let imposterCount = 1; // Store imposter count preference
-        let randomImposter = false; // Store random imposter preference
+      const socket = new WebSocket("https://imposter-game-dkho.onrender.com");
+      socket.addEventListener("error", (event) => {
+        alert("Server is down!. Try again in 30s");
+      });
+      let isAdmin = false;
+      let roomId = "";
+      let imposterCount = 1; // Store imposter count preference
+      let randomImposter = false; // Store random imposter preference
 
-        // Join button to send room ID and join the game
-        document.getElementById('join-btn').addEventListener('click', () => {
-            roomId = document.getElementById('room-id').value;
-            if (!roomId) {
-                alert('Please enter a Room ID');
-                return;
-            }
-            socket.send(JSON.stringify({ type: 'join', roomId }));
+      // Join button to send room ID and join the game
+      document.getElementById("join-btn").addEventListener("click", () => {
+        const roomId = document.getElementById("room-id").value;
+        const playerName = document.getElementById("player-name").value;
 
-            // Hide the room input section and show the current room ID
-            document.getElementById('room-section').style.display = 'none';
-            document.getElementById('current-room-id').classList.remove('hidden');
-            document.getElementById('room-id-display').textContent = roomId;
-        });
+        if (!roomId || !playerName) {
+          alert("Please enter both your name and a Room ID");
+          return;
+        }
 
-        // Listen for messages from the server
-        socket.onmessage = (event) => {
-            const data = JSON.parse(event.data);
+        // Send the room ID and player name to the server
+        socket.send(JSON.stringify({ type: "join", roomId, playerName }));
 
-            if (data.type === 'joined') {
-                if (data.isAdmin) {
-                    isAdmin = true;
-                    document.getElementById('admin-screen').style.display = 'block';
-                } else {
-                    document.getElementById('waiting-screen').style.display = 'block';
-                }
-            }
+        // Hide the room input section and show the current room ID
+        document.getElementById("room-section").style.display = "none";
+        document.getElementById("current-room-id").classList.remove("hidden");
+        document.getElementById("room-id-display").textContent = roomId;
+      });
 
-            if (data.type === 'playerCount') {
-                document.getElementById('player-count-num').textContent = data.count;
-            }
+      // Listen for messages from the server
+      socket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
 
-            if (data.type === 'gameStart') {
-                document.getElementById('waiting-screen').style.display = 'none';
-                document.getElementById('admin-screen').style.display = 'none';
-                document.getElementById('game-screen').style.display = 'block';
-                document.getElementById('word').innerText = data.word || "You are the imposter!";
+        if (data.type === "joined") {
+          if (data.isAdmin) {
+            isAdmin = true;
+            document.getElementById("admin-screen").style.display = "block";
+          } else {
+            document.getElementById("waiting-screen").style.display = "block";
+          }
+        }
 
-                // If admin, show the "Next Game" button
-                if (isAdmin) {
-                    document.getElementById('next-game-section').classList.remove('hidden');
-                }
-            }
+        if (data.type === "playerCount") {
+          document.getElementById("player-count-num").textContent = data.count;
+          const playerNamesList = document.getElementById("player-names");
+          playerNamesList.innerHTML = ""; // Clear current list
+          data.players.forEach((playerName, index) => {
+            const listItem = document.createElement("li");
+            listItem.classList.add("player-item");
+            listItem.innerHTML = `
+            <span class="player-name">${playerName}</span>
+            ${index === 0 ? '<span class="player-admin">Admin</span>' : ""}
+        `;
+            if (index === 0) listItem.classList.add("admin"); // Highlight admin
+            playerNamesList.appendChild(listItem);
+          });
+        }
 
-            if (data.type === 'resetGame') {
-                document.getElementById('game-screen').style.display = 'none';
-                document.getElementById('waiting-screen').style.display = 'block';
-                document.getElementById('next-game-section').classList.add('hidden');  // Hide next game button
-            }
-        };
+        if (data.type === "gameStart") {
+          document.getElementById("waiting-screen").style.display = "none";
+          document.getElementById("admin-screen").style.display = "none";
+          document.getElementById("game-screen").style.display = "block";
+          document.getElementById("word").innerText =
+            data.word || "You are the imposter!";
 
-        // Admin starts the game
-        document.getElementById('start-btn').addEventListener('click', () => {
-            imposterCount = document.getElementById('imposter-count').value;
-            randomImposter = document.getElementById('random-imposter').checked;
+          // If admin, show the "Next Game" button
+          if (isAdmin) {
+            document
+              .getElementById("next-game-section")
+              .classList.remove("hidden");
+          }
+        }
 
-            socket.send(JSON.stringify({ type: 'start', roomId, imposterCount, randomImposter }));
-        });
+        if (data.type === "resetGame") {
+          document.getElementById("game-screen").style.display = "none";
+          document.getElementById("waiting-screen").style.display = "block";
+          document.getElementById("next-game-section").classList.add("hidden"); // Hide next game button
+        }
+      };
 
-        // Admin starts the next game
-        document.getElementById('next-game-btn').addEventListener('click', () => {
-            socket.send(JSON.stringify({ type: 'nextGame', roomId, imposterCount, randomImposter }));
-        });
+      // Admin starts the game
+      document.getElementById("start-btn").addEventListener("click", () => {
+        imposterCount = document.getElementById("imposter-count").value;
+        randomImposter = document.getElementById("random-imposter").checked;
+
+        socket.send(
+          JSON.stringify({
+            type: "start",
+            roomId,
+            imposterCount,
+            randomImposter,
+          })
+        );
+      });
+
+      // Admin starts the next game
+      document.getElementById("next-game-btn").addEventListener("click", () => {
+        socket.send(
+          JSON.stringify({
+            type: "nextGame",
+            roomId,
+            imposterCount,
+            randomImposter,
+          })
+        );
+      });
     </script>
-</body>
+  </body>
 </html>
