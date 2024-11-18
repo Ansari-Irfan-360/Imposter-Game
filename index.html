@@ -217,6 +217,13 @@
             <span class="slider"></span>
           </div>
         </label>
+        <label class="checkbox-label">
+            <span>Genre</span>
+            <div class="toggle">
+              <input type="checkbox" id="genre-button" />
+              <span class="slider"></span>
+            </div>
+          </label>
         <button id="start-btn">Start Game</button>
         <div
           class="error-message"
@@ -233,6 +240,7 @@
       <!-- Game screen for all players -->
       <div id="game-screen" style="display: none">
         <p id="word"></p>
+        <p id="genre" style="font-size:medium;" class="hidden"></p>
         <p id="other-imposters" class="hidden"></p>
       </div>
 
@@ -264,7 +272,8 @@
       let isAdmin = false;
       let roomId = "";
       let imposterCount = 1; // Store imposter count preference
-      let randomImposter = false; // Store random imposter preference
+      let randomImposter = false;
+      let genre = false;
       let playerName = "";
 
       // Join button to send room ID and join the game
@@ -321,6 +330,11 @@
           document.getElementById("admin-screen").style.display = "none";
           document.getElementById("game-screen").style.display = "block";
           document.getElementById("word").innerText = data.word || "Imposter";
+          if(data.genre){
+            document.getElementById("genre").innerText = `Genre: ${data.genre}`;
+            document.getElementById("genre").classList.remove("hidden");
+          }
+          
 
           // Check if the player is an imposter and display other imposters
           if (data.imposters) {
@@ -358,6 +372,7 @@
       document.getElementById("start-btn").addEventListener("click", () => {
         imposterCount = document.getElementById("imposter-count").value;
         randomImposter = document.getElementById("random-imposter").checked;
+        genreCheck = document.getElementById("genre-button").checked;
 
         socket.send(
           JSON.stringify({
@@ -365,6 +380,7 @@
             roomId,
             imposterCount,
             randomImposter,
+            genreCheck
           })
         );
       });
@@ -380,6 +396,7 @@
             roomId,
             imposterCount,
             randomImposter,
+            genreCheck
           })
         );
       });
