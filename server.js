@@ -1,4 +1,4 @@
-import wordGenreArray from "./data.js"
+const wordGenreArray = require("./data.js");
 
 const WebSocket = require("ws");
 
