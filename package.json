@@ -1,7 +1,6 @@
 {
   "name": "odd-one-out",
   "version": "1.0.0",
-  "type": "module",
   "description": "Odd One Out game using WebSocket",
   "main": "server.js",
   "scripts": {
