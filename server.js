@@ -44,6 +44,9 @@ wss.on("connection", (ws) => {
 
       // Notify all players in the room about the updated player count
       updatePlayerCount(roomId);
+
+       // Log the joining player and their room
+      console.log(`${playerName} has joined room ${roomId}`);
     }
 
     if (data.type === "start" && ws === rooms[data.roomId].admin?.ws) {
