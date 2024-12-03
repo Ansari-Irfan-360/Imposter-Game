@@ -648,4 +648,5 @@ const wordGenreArray = [
   ["yarn", "material"],
 ];
 
-export default wordGenreArray;
+module.exports = wordGenreArray;
+
