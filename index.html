@@ -183,6 +183,55 @@
         position: absolute;
         right: 10px;
       }
+      .player-you {
+        font-size: 12px;
+        font-weight: bold;
+        background-color: #9bbbdf;
+        color: white;
+        padding: 3px 8px;
+        border-radius: 4px;
+        position: absolute;
+        right: 10px;
+      }
+
+      #game-instructions {
+        background-color: rgb(203, 203, 203);
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        margin: 20px auto;
+        text-align: left;
+        max-width: 600px;
+        width: 90%;
+        box-sizing: border-box;
+      }
+
+      #game-instructions h2 {
+        color: #4a90e2;
+        font-size: 24px;
+        margin-bottom: 10px;
+      }
+
+      #game-instructions h3 {
+        font-size: 20px;
+        color: #4a90e2;
+        margin-top: 15px;
+      }
+
+      #game-instructions ul {
+        font-size: 16px;
+        list-style: none;
+        padding: 0;
+        margin-top: 10px;
+      }
+
+      #game-instructions li {
+        margin: 8px 0;
+      }
+
+      #game-instructions li strong {
+        color: #4a90e2;
+      }
     </style>
   </head>
   <body>
@@ -199,6 +248,61 @@
         <input type="text" id="room-id" placeholder="Enter Room ID" required />
 
         <button id="join-btn">Join Game</button>
+
+        <!-- Description and How to Play Section -->
+        <div id="game-instructions" class="hidden">
+          <h2 style="text-align: center">Game Description</h2>
+          <p>
+            The "Imposter Game" is a fun multiplayer game where players try to
+            spot imposters among them using related words.
+          </p>
+          <p>
+            Players take turns saying a word related to their given word to
+            avoid suspicion while also making sure that the imporster doesn’t
+            get the word, imposters who didn’t receive a word must blend in
+            without being caught.
+          </p>
+
+          <h3 style="text-align: center">How to Play</h3>
+          <ul>
+            <li>
+              <strong>Join a Game:</strong> Enter a Room ID and Your Name then
+              click "Join Game".
+            </li>
+            <li>
+              <strong>Admin Setup:</strong> The first player to join becomes the
+              admin and sets the imposter count.
+            </li>
+
+            <li>
+              <strong>Start the Game:</strong> Once the settings are configured,
+              the admin clicks "Start Game" to begin the session.
+            </li>
+            <li>
+              <strong>Gameplay:</strong> Players get a word. Imposters have no
+              word and try to mislead others.
+            </li>
+            <li>
+              <strong>Next Game:</strong> Admin clicks "Next Game" to continue
+              without refreshing.
+            </li>
+            <li>
+              <strong>Randomize Imposter Button:</strong> The admin can toggle
+              the "Randomize Count" button. If enabled, the number of imposters
+              will be randomly selected between 1 and the maximum value set by
+              the admin.
+            </li>
+            <li>
+              <strong>Genre Button:</strong> The admin can toggle the "Genre"
+              button. If enabled, all players, including imposters, will receive
+              a genre along with their word. This makes it harder to identify
+              the imposters.
+            </li>
+          </ul>
+        </div>
+
+        <!-- Toggle Button -->
+        <button id="toggle-instructions-btn">Show Instructions</button>
       </div>
 
       <!-- Display the current room ID -->
@@ -208,7 +312,7 @@
 
       <!-- Admin screen to start the game -->
       <div id="admin-screen" style="display: none">
-        <label for="imposter-count" >Number of imposters:</label>
+        <label for="imposter-count">Number of imposters:</label>
         <input type="number" id="imposter-count" min="1" max="10" value="1" />
         <label class="checkbox-label">
           <span>Randomize Count</span>
@@ -217,13 +321,6 @@
             <span class="slider"></span>
           </div>
         </label>
-        <label class="checkbox-label">
-            <span>Genre</span>
-            <div class="toggle">
-              <input type="checkbox" id="genre-button" />
-              <span class="slider"></span>
-            </div>
-          </label>
         <button id="start-btn">Start Game</button>
         <div
           class="error-message"
@@ -240,7 +337,6 @@
       <!-- Game screen for all players -->
       <div id="game-screen" style="display: none">
         <p id="word"></p>
-        <p id="genre" style="font-size:medium;" class="hidden"></p>
         <p id="other-imposters" class="hidden"></p>
       </div>
 
@@ -249,7 +345,7 @@
         <button id="next-game-btn">Next Game</button>
       </div>
 
-      <div id="player-count" class="hidden">
+      <div id="player-count">
         Players connected: <span id="player-count-num">0</span>
       </div>
       <ul id="player-names"></ul>
@@ -272,18 +368,63 @@
       let isAdmin = false;
       let roomId = "";
       let imposterCount = 1; // Store imposter count preference
-      let randomImposter = false;
-      let genre = false;
+      let randomImposter = false; // Store random imposter preference
       let playerName = "";
+      const randomNames = [
+        "James",
+        "John",
+        "Robert",
+        "Michael",
+        "William",
+        "David",
+        "Joseph",
+        "Charles",
+        "Thomas",
+        "Daniel",
+        "Matthew",
+        "George",
+        "Andrew",
+        "Edward",
+        "Henry",
+        "Samuel",
+        "Jack",
+        "Oliver",
+        "Benjamin",
+        "Lucas",
+      ];
+
+      // Toggle instructions visibility
+      document
+        .getElementById("toggle-instructions-btn")
+        .addEventListener("click", () => {
+          const instructions = document.getElementById("game-instructions");
+          const toggleButton = document.getElementById(
+            "toggle-instructions-btn"
+          );
+
+          if (instructions.classList.contains("hidden")) {
+            instructions.classList.remove("hidden");
+            toggleButton.textContent = "Hide Instructions";
+          } else {
+            instructions.classList.add("hidden");
+            toggleButton.textContent = "Show Instructions";
+          }
+        });
 
       // Join button to send room ID and join the game
       document.getElementById("join-btn").addEventListener("click", () => {
         roomId = document.getElementById("room-id").value;
         playerName = document.getElementById("player-name").value;
 
-        if (!roomId || !playerName) {
-          alert("Please enter both your name and a Room ID");
-          return;
+        if (!roomId) {
+          roomId = "0"; // Default room ID
+        }
+
+        if (!playerName) {
+          // Generate a random index from the array
+          const randomIndex = Math.floor(Math.random() * randomNames.length);
+
+          playerName = randomNames[randomIndex]; // Assign a random name from the array
         }
 
         // Send the room ID and player name to the server
@@ -294,6 +435,7 @@
         document.getElementById("current-room-id").classList.remove("hidden");
         document.getElementById("room-id-display").textContent = roomId;
       });
+
 
       // Listen for messages from the server
       socket.onmessage = (event) => {
@@ -309,16 +451,19 @@
         }
 
         if (data.type === "playerCount") {
-          document.getElementById("player-count").classList.remove("hidden");
           document.getElementById("player-count-num").textContent = data.count;
           const playerNamesList = document.getElementById("player-names");
           playerNamesList.innerHTML = ""; // Clear current list
-          data.players.forEach((playerName, index) => {
+          data.players.forEach((playerNameFromList, index) => {
             const listItem = document.createElement("li");
             listItem.classList.add("player-item");
+
             listItem.innerHTML = `
-            <span class="player-name">${playerName}</span>
+            <span class="player-name">${playerNameFromList}</span>
+            ${playerName == playerNameFromList ? '<span class="player-you">You</span>' : ""}
             ${index === 0 ? '<span class="player-admin">Admin</span>' : ""}
+            ${(index === 0) && (playerName == playerNameFromList) ? '<span class="player-admin">You’re Admin</span>' : ""}
+            
         `;
             if (index === 0) listItem.classList.add("admin"); // Highlight admin
             playerNamesList.appendChild(listItem);
@@ -330,19 +475,13 @@
           document.getElementById("admin-screen").style.display = "none";
           document.getElementById("game-screen").style.display = "block";
           document.getElementById("word").innerText = data.word || "Imposter";
-          if(data.genre){
-            document.getElementById("genre").innerText = `Genre: ${data.genre}`;
-            document.getElementById("genre").classList.remove("hidden");
-          }
-          
 
           // Check if the player is an imposter and display other imposters
           if (data.imposters) {
-            
             const otherImposters = data.imposters.filter(
               (name) => name !== playerName
             );
-            
+
             if (otherImposters.length > 0) {
               document.getElementById(
                 "other-imposters"
@@ -372,7 +511,6 @@
       document.getElementById("start-btn").addEventListener("click", () => {
         imposterCount = document.getElementById("imposter-count").value;
         randomImposter = document.getElementById("random-imposter").checked;
-        genreCheck = document.getElementById("genre-button").checked;
 
         socket.send(
           JSON.stringify({
@@ -380,23 +518,18 @@
             roomId,
             imposterCount,
             randomImposter,
-            genreCheck
           })
         );
       });
 
       // Admin starts the next game
       document.getElementById("next-game-btn").addEventListener("click", () => {
-        document
-                .getElementById("other-imposters")
-                .classList.add("hidden");
         socket.send(
           JSON.stringify({
             type: "nextGame",
             roomId,
             imposterCount,
             randomImposter,
-            genreCheck
           })
         );
       });
