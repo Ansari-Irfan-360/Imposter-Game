@@ -373,6 +373,11 @@
         clearTimeout(connectionTimeout); // Clear the timeout if the connection is successful
       });
 
+      socket.addEventListener("close", () => {
+        alert("Disconnected from the server. Reloading...");
+        window.location.reload(); // Reload the page on disconnect
+      });
+
       let isAdmin = false;
       let roomId = "";
       let imposterCount = 1; // Store imposter count preference
