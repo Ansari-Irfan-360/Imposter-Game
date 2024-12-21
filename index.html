@@ -351,6 +351,7 @@
       <!-- Next Game button for admin -->
       <div id="next-game-section" class="hidden">
         <button id="next-game-btn">Next Game</button>
+        <button id="change-settings-btn" >Change Settings</button>
       </div>
 
       <div id="player-count" class="hidden">
@@ -371,11 +372,6 @@
 
       socket.addEventListener("open", () => {
         clearTimeout(connectionTimeout); // Clear the timeout if the connection is successful
-      });
-
-      socket.addEventListener("close", () => {
-        alert("Disconnected from the server. Reloading...");
-        window.location.reload(); // Reload the page on disconnect
       });
 
       let isAdmin = false;
@@ -471,6 +467,8 @@
           if(data.genre){
             document.getElementById("genre").innerText = `Genre: ${data.genre}`;
             document.getElementById("genre").classList.remove("hidden");
+          }else{
+            document.getElementById("genre").classList.add("hidden");
           }
           
 
@@ -522,8 +520,19 @@
         );
       });
 
+      document.getElementById("change-settings-btn").addEventListener("click", () => {
+        document.getElementById("admin-screen").style.display = "block";
+        document.getElementById("change-settings-btn").classList.add("hidden");
+        document.getElementById("start-btn").style.display = "none";
+      });
+
       // Admin starts the next game
       document.getElementById("next-game-btn").addEventListener("click", () => {
+        document.getElementById("change-settings-btn").classList.remove("hidden");
+        
+        imposterCount = document.getElementById("imposter-count").value;
+        randomImposter = document.getElementById("random-imposter").checked;
+        genreCheck = document.getElementById("genre-button").checked;
         document
                 .getElementById("other-imposters")
                 .classList.add("hidden");
